@@ -1,0 +1,3 @@
+[submodule "vendor/actions-yaml"]
+	path = vendor/actions-yaml
+	url = https://github.com/ericsciple/actions-yaml

@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+usage() {
+  echo "Usage: gh lint-workflow <files>..."
+  echo "       gh lint-workflow < path/to/file.yml"
+}
+
+case "$1" in
+-h|--help)
+  usage
+  exit 0
+  ;;
+esac
+
+make_input() {
+  local input_fmt='{
+    command: "parse-workflow",
+    entryFileName: input_filename,
+    files: [{ name: input_filename, content: . }]
+  }'
+  if [ $# -eq 0 ]; then
+    jq --raw-input --slurp "$input_fmt"
+    echo "---"
+    return 0
+  fi
+  local file
+  for file; do
+    jq --raw-input --slurp "$input_fmt" "$file"
+    echo "---"
+  done
+}
+
+parse_files() {
+  make_input "$@" | node vendor/actions-yaml-dist/index.js | sed '/^---/d' | jq -r '.errors[].message'
+}
+
+errors="$(parse_files "$@")"
+if [ -n "$errors" ]; then
+  echo "$errors" >&2
+  exit 1
+fi
