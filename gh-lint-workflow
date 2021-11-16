@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 usage() {
   echo "Usage: gh lint-workflow <files>..."
@@ -40,7 +41,7 @@ make_input() {
 }
 
 parse_files() {
-  make_input "$@" | node vendor/actions-yaml-dist/index.js | sed '/^---/d' | jq -r '.errors[].message'
+  make_input "$@" | node "${BASH_SOURCE%/*}"/vendor/actions-yaml-dist/index.js | sed '/^---/d' | jq -r '.errors[].message'
 }
 
 errors="$(parse_files "$@")"
